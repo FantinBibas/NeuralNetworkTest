@@ -8,7 +8,7 @@ from Board import Board
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description="",
+        description="Simple n sized 2048 game",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "-s",
