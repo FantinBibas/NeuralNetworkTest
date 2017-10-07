@@ -6,13 +6,20 @@ import math
 
 class Board:
 
-    def __init__(self, size, less_random, color):
+    def __init__(self, size, less_random, color, show_score, clear_screen):
         self._size = size
         self._table = [[0 for x in range(size)] for y in range(size)]
         self._empty_case = size * size
         self._less_random = less_random
         self._color = color
+        self._show_score = show_score
+        self._clear_screen = clear_screen
         self._have_moved = 0
+        self._score = 0
+        self._quit = False
+
+    def quit(self):
+        self._quit = True
 
     def get_table(self):
         return self._table
@@ -59,6 +66,7 @@ class Board:
         if self._table[y][x] == next_case:
             self._table[y][x] *= 2
             self._empty_case += 1
+            self._score += self._table[y][x]
         elif self._table[y][x] == 0:
             self._table[y][x] = next_case
         else:
@@ -100,6 +108,26 @@ class Board:
     def move_left(self):
         return self.move(1, 0)
 
+    def can_merge_anything(self):
+        for y in range(0, self._size):
+            for x in range(0, self._size):
+                if (
+                        (x < self._size - 1 and self._table[y][x] == self._table[y][x + 1])
+                        or (y < self._size - 1 and self._table[y][x] == self._table[y + 1][x])
+                ):
+                    return True
+        return False
+
+    def can_play(self):
+        if self._quit:
+            return False
+        if self._empty_case > 0:
+            return True
+        return self.can_merge_anything()
+
+    def get_score(self):
+        return self._score
+
     def __str__(self):
         formatted = ""
         max_len = int(math.ceil(math.log10(max(map(max, self._table)))))
@@ -114,4 +142,11 @@ class Board:
                     formatted += ("%*d" % (max_len, case)) + "|"
             formatted += "\n"
         formatted += row_separator
+
+        if self._show_score:
+            formatted = "Score: " + str(self._score) + "\n" + formatted
+
+        if self._clear_screen:
+            formatted = "\033c" + formatted
+
         return formatted

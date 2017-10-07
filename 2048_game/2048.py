@@ -46,6 +46,24 @@ def parse_arguments():
         default=0,
         help="use colors"
     )
+    parser.add_argument(
+        '-sc',
+        '--score',
+        dest='sc',
+        action='store_const',
+        const=1,
+        default=0,
+        help="show current score"
+    )
+    parser.add_argument(
+        '-cs',
+        '--clear-screen',
+        dest='cs',
+        action='store_const',
+        const=1,
+        default=0,
+        help="clear screen between each move"
+    )
     return parser.parse_args()
 
 
@@ -59,17 +77,28 @@ def get_move(board):
         return board.move_bottom()
     if user_input == 'd':
         return board.move_right()
+    if user_input == 'q':
+        board.quit()
     return False
 
 
-if __name__ == '__main__':
-    options = parse_arguments()
-    board = Board(options.s, options.lr, options.c)
-    board.add_new_case()
-    for i in range(0, 10000):
+def play_game(board, hardcore_mode):
+    legal_move = True
+    while board.can_play() and (legal_move or not hardcore_mode):
         print(board)
-        if get_move(board):
+        legal_move = get_move(board)
+        if legal_move:
             board.add_new_case()
-        elif options.hc:
-            print("LOSER")
-            exit(0)
+    print(board)
+    return board.get_score()
+
+
+def start_game(options):
+    board = Board(options.s, options.lr, options.c, options.sc, options.cs)
+    board.add_new_case()
+    score = play_game(board, options.hc)
+    print("FINAL SCORE: " + str(score))
+
+
+if __name__ == '__main__':
+    start_game(parse_arguments())
